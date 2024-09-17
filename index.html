@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Workers</title>
+    <script src="worker.js" defer></script>
+    <script src="main.js" defer></script>
+    <script src="fetch.js" defer></script>
+    <link rel="stylesheet" href="style.css" >
+    <style>
+        body {
+          width: 500px;
+        }
+  
+        div,
+        p {
+          margin-bottom: 20px;
+        }
+      </style>
+</head>
+    <body>
+        <input type="number" id="first" placeholder="Enter first number">
+        <input type="number" id="second" placeholder="Enter second number">
+        <button id="getTable">Fetch and Display Data</button>
+        <div id="result"></div>
+        <h1>Paginated Table Example</h1>
+        <div id="table-container"></div>
+        <div class="pagination">
+            <button id="prev-btn">Previous</button>
+            <span id="page-info">Page 1</span>
+            <button id="next-btn">Next</button>
+        </div>
+    </body>
+</html>
