@@ -4,32 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Workers</title>
-    <script src="worker.js" defer></script>
-    <script src="main.js" defer></script>
-    <script src="fetch.js" defer></script>
+    <script type="module" src="pagination.js" defer></script>
+    <script type="module" src="worker.js" defer></script>
+    <script type="module" src="table.js" defer></script>
+    <script type="module" src="main.js" defer></script>
     <link rel="stylesheet" href="style.css" >
-    <style>
-        body {
-          width: 500px;
-        }
-  
-        div,
-        p {
-          margin-bottom: 20px;
-        }
-      </style>
 </head>
     <body>
-        <input type="number" id="first" placeholder="Enter first number">
-        <input type="number" id="second" placeholder="Enter second number">
-        <button id="getTable">Fetch and Display Data</button>
-        <div id="result"></div>
-        <h1>Paginated Table Example</h1>
-        <div id="table-container"></div>
-        <div class="pagination">
-            <button id="prev-btn">Previous</button>
-            <span id="page-info">Page 1</span>
-            <button id="next-btn">Next</button>
+        <div class="dropdown">
+            <button class="dropbtn">Number of Items</button>
+            <div id="myDropdown" class="dropdown-content">
+              <a href="#">1</a>
+              <a href="#"> 2</a>
+              <a href="#"> 3</a>
+              <a href="#">4</a>
+              <a href="#">5</a>
+              <a href="#">6</a>
+              <a href="#">7</a>
+              <a href="#">8</a>
+              <a href="#">9</a>
+              <a href="#">10</a>
+            </div>
+          </div>
+        <div id="container">
+            <div id="tableContainer"></div>
+            <div id="output"></div>
+            <div class="pagination">
+                <button id="prevPageBtn">Previous</button>
+                <span id="pageInfo">Page 1</span>
+                <button id="nextPageBtn">Next</button>
+            </div>
         </div>
     </body>
 </html>
+

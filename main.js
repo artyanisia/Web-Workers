@@ -1,26 +1,60 @@
-document.addEventListener('DOMContentLoaded', () => {
-    
-    const myWorker = new Worker("worker.js");
+import { fetchDataForPage, updateButtons } from "./pagination.js";
+import { createTableFromSessionStorage } from "./sessionStorage.js";
 
-    const first = document.getElementById('first');
-    const second = document.getElementById('second');
-    const result = document.getElementById('result');
+let worker;
 
-    if (window.Worker) {
-        second.addEventListener('change', () => {
-            myWorker.postMessage([first.value, second.value]); // Sends message
-            console.log("Message posted to worker");
-        });
+const dropdownButton = document.querySelector('.dropbtn');
+const dropdownContent = document.getElementById('myDropdown');
+const dropdownItems = dropdownContent.querySelectorAll('a');
+//trebuie sa am pageSize cu input
+// sa fac ca worker-ul sa tina minte previous si nextpage
+//pagina sa aiba timp de expirare
 
-        myWorker.addEventListener('message', (e) => {
-            result.textContent = `Result: ${e.data}`;
-            console.log("Message received from worker");
-        });
+export function fetchData(page, tableConatiner, output, pageSize){
 
-        myWorker.addEventListener('error', (e) => {
-            console.error('Error in worker:', e.message);
-        });
-    } else {
-        console.error("Web Workers are not supported in this browser.");
+    const url = `https://dummyjson.com/products?skip=${page}&limit=${pageSize}`;
+
+    if(worker){
+        worker.terminate(); //i have to terminate the worker before creating a new one
     }
+
+    worker = new Worker('worker.js');
+
+    worker.onmessage = function(event) {
+        const { type, data, message } = event.data; //data from the worker
+        
+        if(type === 'success') {
+
+            sessionStorage.setItem('productsData', JSON.stringify(data));
+            createTableFromSessionStorage(tableContainer,output);
+            updateButtons(data.length === pageSize);
+
+        } else if(type === 'error'){
+            console.error('Error fetching data:', message);
+            tableConatiner.textContent = `Error: ${message}`;
+        }
+    };
+
+    worker.postMessage({ url, page, pageSize});
+}
+
+//automatically fetch first page when loaded
+document.addEventListener('DOMContentLoaded', function() {
+    dropdownButton.addEventListener('click', () => {
+        dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (!event.target.matches('.dropbtn')) {
+            if (dropdownContent.style.display === 'block') {
+                dropdownContent.style.display = 'none';
+            }
+        }
+    });
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (event) => {
+            const selectedValue = Number(event.target.textContent); // Get the text content of the clicked item
+            fetchDataForPage(1, selectedValue);
+        });
+    });
 });
