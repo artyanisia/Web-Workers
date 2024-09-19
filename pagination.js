@@ -26,7 +26,7 @@ function fetchDataForPage(page, pageSize) {
     itemNumber=pageSize;
     updatePageInfo(page);
     const skip = (currentPage-1) * pageSize;
-    fetchData(skip, tableContainer, output, pageSize);
+    fetchData(skip, tableContainer, output, pageSize, currentPage-1);
 }
 
 
