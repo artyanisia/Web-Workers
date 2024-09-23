@@ -5,11 +5,19 @@ export function createTable(data, tableContainer, output) {
     tableContainer.innerHTML = ''; 
     output.innerHTML = '';
 
-    if (!Array.isArray(data) || data.length === 0) {
+    if (typeof data === 'object' && data !== null) {
+        if (Array.isArray(data.products) && data.products.length > 0) {
+            data = data.products; // Use the products array for table creation
+        } else {
+            output.textContent = 'No products available.';
+            return;
+        }
+    } else if (!Array.isArray(data) || data.length === 0) {
         output.textContent = 'No data available.';
         return;
     }
-    
+
+    // Check the format of the first item in the array
     if (typeof data[0] !== 'object' || data[0] === null) {
         output.textContent = 'Data format is incorrect.';
         return;

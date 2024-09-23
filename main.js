@@ -1,81 +1,48 @@
-import { fetchDataForPage, updateButtons } from "./pagination.js";
-import { createTableFromSessionStorage } from "./sessionStorage.js";
+import { updateButtons } from "./pagination.js";
 import { createTable } from "./table.js";
 
+const EXPIRY_TIME = 1000 * 60 * 5; // 5 minutes
+
 let worker;
-let page;
 
 const dropdownButton = document.querySelector(".dropbtn");
 const dropdownContent = document.getElementById("myDropdown");
 const dropdownItems = dropdownContent.querySelectorAll("a");
 
-// sa fac ca worker-ul sa tina minte previous si nextpage
+
+const url = `https://dummyjson.com/products`;
 //pagina sa aiba timp de expirare
 
 worker = new Worker("fetchWorker.js");
 
-worker.onmessage = function (event) {
-  console.warn("on message 2", event);
+worker.onmessage = async function (event) {
   const { type, data, pageSize, pageNumber } = event.data; //data from the worker
 
   console.warn("Worker message received:", event.data);
 
-  if (type === "pagesData") {
-    let pageKey = `page${pageNumber}`;
+    if (type === "initialLoadData") {
 
-    const currentPageData = data[pageKey] || {};
+        const {currentPageData, nextPageData} = data;
+        sessionStorage.setItem("currentPageData", JSON.stringify(currentPageData));
+        sessionStorage.setItem("nextPageData", JSON.stringify(nextPageData));
 
-    // console.log('Available data keys:', Object.keys(data));
+        if (currentPageData.error) {
+            tableContainer.textContent = `Error loading current page data: ${currentPageData.error}`;
+        } else {
+            createTable(currentPageData, tableContainer,output); // Update the UI with the current page data
+        }
 
-    //   sessionStorage.setItem(
-    //     "currentPageData",
-    //     JSON.stringify(currentPageData)
-    //   );
-    //   sessionStorage.setItem(
-    //     "previousPageData",
-    //     JSON.stringify(previousPageData)
-    //   );
-    sessionStorage.setItem("nextPageData", JSON.stringify(nextPageData));
-
-    if (currentPageData.error) {
-      tableContainer.textContent = `Error loading current page data: ${currentPageData.error}`;
-    } else {
-      // createTableFromSessionStorage(tableContainer, output);
+        const hasNextPage = nextPageData && nextPageData.products.length === pageSize;
+        // console.warn("next page data",nextPageData)
+        // console.warn("next page data length",nextPageData.length)
+        // console.warn("page size",pageSize)
+        // console.warn(nextPageData.length === pageSize)
+        updateButtons(hasNextPage);
+    
+    } else if (type === "error") {
+        console.error("Error fetching data:", data.message);
     }
-
-    const hasNextPage = nextPageData && nextPageData.length === pageSize;
-    updateButtons(hasNextPage);
-  } else if (type === "error") {
-    console.error("Error fetching data:", data.message);
-  }
 };
-
-export function fetchData(page, tableContainer, output, pageSize, pageNumber) {
-  createTableFromSessionStorage(tableContainer, output);
-
-  const url = `https://dummyjson.com/products`;
-
-  const currentPage = pageNumber !== undefined ? pageNumber : 0; // Default to 0 if pageNumber is not provided
-  const validPageSize = pageSize !== undefined ? pageSize : 10; // Default pageSize to 10 if undefined
-
-  // Guard to ensure URL and pageSize are valid
-  if (!url || typeof validPageSize !== "number" || isNaN(validPageSize)) {
-    console.error("Invalid URL or page size:", { url, validPageSize });
-    return;
-  }
-
-  //   if (worker) {
-  //     worker.terminate(); //i have to terminate the worker before creating a new one
-  //   }
-
-  console.warn(`Posting message to worker with: `, {
-    url,
-    page: pageNumber,
-    pageSize,
-  });
-
-  worker.postMessage({ url, page: currentPage, pageSize });
-}
 
 //automatically fetch first page when loaded
 document.addEventListener("DOMContentLoaded", function () {
@@ -94,7 +61,14 @@ document.addEventListener("DOMContentLoaded", function () {
   dropdownItems.forEach((item) => {
     item.addEventListener("click", (event) => {
       const selectedValue = Number(event.target.textContent); // Get the text content of the clicked item
-      fetchDataForPage(1, selectedValue);
+      sessionStorage.setItem('PageSize', selectedValue);
+      const url = `https://dummyjson.com/products`;
+      worker.postMessage({
+        url,
+        page: 1,
+        pageSize: selectedValue,
+        type: "initialLoad"
+      });
     });
   });
   window.onload = function () {

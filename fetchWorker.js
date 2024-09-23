@@ -1,70 +1,102 @@
-self.onmessage = function (event) {
+self.onmessage = async function (event) {
   console.warn("message fetchWorker", event);
 
-  const { type, url, page, pageSize } = event.data;
-  // console.log('Received message:', event.data);
+  const { type, url, page, pageSize , direction } = event.data;
 
   if (isNaN(page)) {
     throw new Error("cannot load non number pages");
   }
 
-  function fetchPage(pageNumber) {
-    const pageOffset = pageNumber * pageSize;
-    const fetchUrl = `${url}?skip=${pageOffset}&limit=${pageSize}`;
-    // console.log(`Fetching URL: ${fetchUrl}`);
+    if(type === "initialLoad"){
+        const currentPageUrl = `${url}?skip=${(page-1)*pageSize}&limit=${pageSize}`;
+        const nextPageUrl = `${url}?skip=${page*pageSize}&limit=${pageSize}`;
+        try {
+            // Fetch current page data first
+            const currentPageResponse = await fetch(currentPageUrl);
+            const currentPageData = await currentPageResponse.json();
+      
+            // Fetch next page data
+            const nextPageResponse = await fetch(nextPageUrl);
+            const nextPageData = await nextPageResponse.json();
+            
+        
+            self.postMessage({
+              type: "initialLoadData",
+              data: { currentPageData, nextPageData },
+              pageSize,
+              pageNumber: page,
+            });
+          } catch (error) {
+           
+            self.postMessage({
+              type: "error",
+              message: error.message,
+            });
+          }
 
-    return fetch(fetchUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+    } else if(type === "navigate"){
+        
+        let targetPageUrl;
+
+        if(direction === "prev"){
+            targetPageUrl = `${url}?limit=${pageSize}&skip=${(page-2) * pageSize}`;
         }
-        return response.json();
-      })
-      .then((data) => {
-        //console.log(`Data fetched for page ${pageNumber}:`, data);
-        return { pageNumber, products: data.products };
-      })
-      .catch((error) => {
-        console.error(`Error fetching page ${pageNumber}:`, error.message);
-        return { pageNumber, error: error.message };
-      });
-  }
+        else {
+            targetPageUrl = `${url}?limit=${pageSize}&skip=${page * pageSize}`;
+        }
 
-  const pagesToFetch = [page + 1];
+        try {
+     
+        const pageResponse = await fetch(targetPageUrl);
+        const pageData = await pageResponse.json();
 
-  console.warn("Pages to fetch:", page, pagesToFetch);
-
-  // const results = {};
-
-  pagesToFetch.forEach((pageNumber) => {
-    //console.log(`Fetching page ${pageNumber}`);
-    fetchPage(pageNumber)
-      .then((result) => {
-        //console.log(`Result for page ${pageNumber}:`, result);
-        // if (result.error) {
-        //   results[`page${result.pageNumber}`] = { error: result.error };
-        // } else {
-        //   results[`page${result.pageNumber}`] = result.products;
-        // }
-
-        //console.log('All pages fetched:', results);
+       
         self.postMessage({
-          type: "pagesData",
-          data: result,
-          pageSize,
-          pageNumber,
+            type: "navigationData",
+            data: { pageData },
+            pageSize,
+            pageNumber: page,
+            direction,
         });
-      })
-      .catch((error) => {
-        console.error("Error fetching page:", error);
-
+        } catch (error) {
+        // Handle any error
         self.postMessage({
-          type: "pagesData",
-          data: results,
-          pageSize,
-          pageNumber,
+            type: "error",
+            message: error.message,
         });
-        //console.log('Results to be posted:', results);
-      });
-  });
+        }
+    } else if( type === "refetchAllPages"){
+
+        try{
+            const currentPageUrl = `${url}?limit=${pageSize}&skip=${(currentPage - 1) * pageSize}`;
+            const previousPageUrl  = `${url}?limit=${pageSize}&skip=${(currentPage - 1) * pageSize}`;
+            const nextPageUrl  = `${url}?limit=${pageSize}&skip=${(currentPage - 1) * pageSize}`;
+
+            const [currentResponse, previousResponse, nextResponse] = await Promise.all([
+                fetch(currentPageUrl),
+                fetch(previousPageUrl),
+                fetch(nextPageUrl),
+            ]);
+
+            const currentData = await currentResponse.json();
+            const previousData = await previousResponse.json();
+            const nextData = await nextResponse.json();
+
+            self.postMessage({
+                type: "allDataFetched",
+                data:{
+                    currentData,
+                    previousData,
+                    nextData,
+                },
+            });
+
+        }catch (error) {
+            self.postMessage({
+                type: "error",
+                message: error.message,
+            });
+        }
+    }
+
 };
