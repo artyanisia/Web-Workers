@@ -10,10 +10,11 @@ body{
     height: 100vh; /* Full viewport height */
 }
 
+/*
 #tableContainer {
-    flex: 1; /* Take up available space */
-}
 
+}
+*/
 
 table {
     text-align: left;
