@@ -1,7 +1,6 @@
 import { updateButtons } from "./pagination.js";
 import { createTable } from "./table.js";
-
-const EXPIRY_TIME = 1000 * 60 * 5; // 5 minutes
+import { startExpiryTimer } from "./expiry.js";
 
 let worker;
 
@@ -11,14 +10,13 @@ const dropdownItems = dropdownContent.querySelectorAll("a");
 
 
 const url = `https://dummyjson.com/products`;
-//pagina sa aiba timp de expirare
 
 worker = new Worker("fetchWorker.js");
 
 worker.onmessage = async function (event) {
   const { type, data, pageSize, pageNumber } = event.data; //data from the worker
 
-  console.warn("Worker message received:", event.data);
+  //console.warn("Worker message received:", event.data);
 
     if (type === "initialLoadData") {
 
@@ -33,10 +31,6 @@ worker.onmessage = async function (event) {
         }
 
         const hasNextPage = nextPageData && nextPageData.products.length === pageSize;
-        // console.warn("next page data",nextPageData)
-        // console.warn("next page data length",nextPageData.length)
-        // console.warn("page size",pageSize)
-        // console.warn(nextPageData.length === pageSize)
         updateButtons(hasNextPage);
     
     } else if (type === "error") {
@@ -69,6 +63,8 @@ document.addEventListener("DOMContentLoaded", function () {
         pageSize: selectedValue,
         type: "initialLoad"
       });
+      const intervalTime = 10000;
+      startExpiryTimer(intervalTime, 1);
     });
   });
   window.onload = function () {

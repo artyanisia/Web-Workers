@@ -1,39 +1,35 @@
-const EXPIRY_TIME = 1000 * 60 * 5;
 
-const worker = new Worker("fetchWorker.js");
+const expiryWorker = new Worker ("expiryWorker.js");
 
-function fetchDataWithExpiry(url, pageSize) {
-    const now = new Date();
-    const storedData = JSON.parse(sessionStorage.getItem("currentPageData"));
+export function startExpiryTimer(intervalTime, page) {
+    const pageSize = Number(sessionStorage.getItem("PageSize"));
     
-    // Check if stored data exists and is still valid
-    if (storedData && (now.getTime() < storedData.expiry)) {
-        // Data is still valid, use it
-        createTable(storedData.value, tableContainer, output);
-        console.log("Using cached data");
-    } else {
-        // Data is expired or doesn't exist, send message to worker to fetch new data
-        worker.postMessage({ type: "refetchAllPages", url, pageSize });
+    let type;
+    if( page === 1){
+        type = "initialRefetch";
+    } 
+    else{
+        type = 'refetch';
     }
-}
+    console.warn("Expiry timer starter", type)
+    setInterval(() => {
+        expiryWorker.postMessage({
+          type: type,
+          page: page,
+          url: "https://dummyjson.com/products",
+          pageSize: pageSize,
+        });
+      }, intervalTime);
 
-worker.onmessage = function(event) {
+    expiryWorker.onmessage = function(event) {
 
-    const { type, data } = event.data;
+        const { type, data } = event.data;
 
-    if(type === "allDataFetched"){
-
-        const now = new Date();
-        const expiryTime = now.getTime() + EXPIRY_TIME;
-
-        sessionStorage.setItem("currentPageData", JSON.stringify({ value: data.currentData, expiry: expiryTime}));
-        sessionStorage.setItem("previousPageData", JSON.stringify({ value: data.previousData, expiry: expiryTime}));
-        sessionStorage.setItem("nextPageData", JSON.stringify({ value: data.nextData, expiry: expiryTime}));
-
-        createTable(data.currentData, tableContainer, output);
-        console.warn("Updated table with new current data");
-    }
-    else if ( type === "error"){
-        console.error("Error fetching data: ", data.message);
+        if(type === "allDataFetched"){
+            console.warn("Refectched data:", data);
+        }
+        else if ( type === "error"){
+            console.error("Error fetching data: ", data.message);
+        }
     }
 }

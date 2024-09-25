@@ -1,5 +1,5 @@
 import { createTable } from "./table.js";
-
+import { startExpiryTimer } from "./expiry.js";
 
 const prevPageBtn = document.getElementById("prevPageBtn");
 const nextPageBtn = document.getElementById("nextPageBtn");
@@ -14,8 +14,6 @@ const worker = new Worker("fetchWorker.js");
 
 worker.onmessage = async function (event) {
     const { type, data, pageSize, direction } = event.data; //data from the worker
-  
-    console.warn("Worker message received:", event.data);
   
     if(type === "navigationData"){
   
@@ -46,6 +44,8 @@ worker.onmessage = async function (event) {
 
 function updatePageInfo(page) {
   pageInfo.textContent = `Page ${page}`;
+  const intervalTime = 10000;
+  startExpiryTimer(intervalTime,page);
 }
 
 function updateButtons(hasMorePages) {
