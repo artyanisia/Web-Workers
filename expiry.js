@@ -11,7 +11,7 @@ export function startExpiryTimer(intervalTime, page) {
     else{
         type = 'refetch';
     }
-    console.warn("Expiry timer starter", type)
+    //console.warn("Expiry timer starter", type)
     setInterval(() => {
         expiryWorker.postMessage({
           type: type,
@@ -26,7 +26,7 @@ export function startExpiryTimer(intervalTime, page) {
         const { type, data } = event.data;
 
         if(type === "allDataFetched"){
-            console.warn("Refectched data:", data);
+            //console.warn("Refectched data:", data);
         }
         else if ( type === "error"){
             console.error("Error fetching data: ", data.message);

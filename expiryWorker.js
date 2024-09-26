@@ -2,7 +2,7 @@ self.onmessage = async function (event) {
     
     const { type, url, page, pageSize } = event.data;
     
-    console.warn("Expiry worker recieved message")
+    //console.warn("Expiry worker recieved message")
 
     if(type === "initalRefetch"){
             try{  

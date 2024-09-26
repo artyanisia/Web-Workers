@@ -9,6 +9,7 @@
     <script type="module" src="table.js" defer></script>
     <script type="module" src="main.js" defer></script>
     <script type="module" src="expiry.js" defer></script>
+    <script type="module" src="websocket.js" defer></script>
     <link rel="stylesheet" href="style.css" >
 </head>
     <body>
@@ -27,13 +28,25 @@
               <a href="#">10</a>
             </div>
           </div>
-        <div id="container">
-            <div id="tableContainer"></div>
-            <div id="output"></div>
-            <div class="pagination">
-                <button id="prevPageBtn">Previous</button>
-                <span id="pageInfo">Page 1</span>
-                <button id="nextPageBtn">Next</button>
+
+        <div id="tableContainer"></div>
+        <div id="output"></div>
+        <div class="pagination">
+            <button id="prevPageBtn">Previous</button>
+            <span id="pageInfo">Page 1</span>
+            <button id="nextPageBtn">Next</button>
+        </div>
+        <div class="webSocketContainer">
+            <div>
+                <h3>Web Socket</h3>
+                <input type="text" id="messageInput" placeholder="Enter text">
+                <button id="openConnection">Open Connection</button>
+                <button id="closeConnection">Close Connection</button>
+                <button id="sendMessage">Send Message</button>
+            </div>
+            <div>
+                <h2>Received Message</h2>
+                <div id="receivedMessage"></div>   
             </div>
         </div>
     </body>

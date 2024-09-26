@@ -1,4 +1,4 @@
-import { updateButtons } from "./pagination.js";
+import { updateButtons, updatePageInfo } from "./pagination.js";
 import { createTable } from "./table.js";
 import { startExpiryTimer } from "./expiry.js";
 
@@ -7,7 +7,6 @@ let worker;
 const dropdownButton = document.querySelector(".dropbtn");
 const dropdownContent = document.getElementById("myDropdown");
 const dropdownItems = dropdownContent.querySelectorAll("a");
-
 
 const url = `https://dummyjson.com/products`;
 
@@ -40,6 +39,9 @@ worker.onmessage = async function (event) {
 
 //automatically fetch first page when loaded
 document.addEventListener("DOMContentLoaded", function () {
+
+
+
   dropdownButton.addEventListener("click", () => {
     dropdownContent.style.display =
       dropdownContent.style.display === "block" ? "none" : "block";
@@ -65,6 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const intervalTime = 10000;
       startExpiryTimer(intervalTime, 1);
+      updatePageInfo(1);
     });
   });
   window.onload = function () {

@@ -42,9 +42,10 @@ worker.onmessage = async function (event) {
     }
   };
 
-function updatePageInfo(page) {
+export function updatePageInfo(page) {
   pageInfo.textContent = `Page ${page}`;
-  const intervalTime = 10000;
+  if(page === 1) currentPage = 1;
+  const intervalTime = 5000000;
   startExpiryTimer(intervalTime,page);
 }
 
