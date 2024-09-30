@@ -8,12 +8,19 @@ document.addEventListener("DOMContentLoaded", function() {
     
     let intervalId; 
     let number = 1;
-
+    let socket = null;
+    
     function openConnection(){
         
-        openConnectionButton.disabled=true;
+        if (socket && socket.readyState !== WebSocket.CLOSED) {
+            console.warn('WebSocket is already open or not properly closed.');
+            return; 
+        }
+        else{
+            socket = new WebSocket("https://echo.websocket.org/");
+        }
 
-        const socket = new WebSocket("https://echo.websocket.org/")
+        openConnectionButton.disabled=true;
 
         socket.onopen = function() {
             console.log('Connected to WebSocket Server');
@@ -23,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 number++;
                 socket.send(autoMessage);
                 console.log("Auto-sent: ", autoMessage);
-            }, 3000);  
+            }, 5000);  
         };
 
         socket.onmessage = function(event) {
@@ -57,6 +64,10 @@ document.addEventListener("DOMContentLoaded", function() {
             console.warn("closed connection");
     
             clearInterval(intervalId);
+            openConnectionButton.disabled=false;
+            socket = null;
+            sendButton.removeEventListener('click', sendMessage);
+            closeConnectionButton.removeEventListener('click', closeConnection);
         }
 
         sendButton.addEventListener('click', sendMessage);
