@@ -1,17 +1,24 @@
-Web Workers Project - API Fetching & Expiry Handling
-Overview
-Welcome to my Web Workers project! 🎉 This mini project demonstrates how you can use two Web Workers to efficiently handle data fetching and manage pagination for an API-based table. It's all about making sure your data stays fresh and responsive!
+# Web Workers Project - API Fetching & Expiry Handling
 
-Features
-Worker 1: API Fetcher:
-This worker fetches data from an API and dynamically builds a table for you to interact with.
-The data is stored in session storage, so you don’t have to worry about reloading it constantly. Super smooth!
+## Overview
 
-Worker 2: Expiry Worker:
-Keeps an eye on stale pages.
-When the data gets old, this worker will automatically fetch the expired pages again, keeping your table up-to-date without any manual refreshing.
-Interactive Pagination:
+Welcome to my Web Workers project! 🎉 This mini project shows how I’ve used two Web Workers to handle API fetching and stale data management for a table with pagination.
 
-You can choose how many items you want to see per page, giving you control over your view and experience. The workers handle everything behind the scenes!
+## Features
 
-Explore the project, interact with the pagination, and see the workers in action! 🚀
+- **Worker 1: API Fetcher**  
+  This worker fetches data from an API, builds a table, and stores the data in `sessionStorage` to keep things snappy. You don’t have to reload the data all the time—it’s saved locally for you!
+  
+- **Worker 2: Expiry Worker**  
+  The second worker monitors the data, and when it gets stale, it automatically refetches the expired pages. This way, the table always stays up-to-date, without any manual refreshes.
+
+- **Interactive Pagination**  
+  You can interact with the table by choosing how many items you want to see per page. The workers handle the rest behind the scenes, making sure everything stays responsive and fresh!
+
+## Contributing
+
+Got ideas for improvements or want to make it even more efficient? Feel free to contribute and help make this project even better!
+
+---
+
+Check it out, play with the pagination, and watch the workers do their magic! 🚀
